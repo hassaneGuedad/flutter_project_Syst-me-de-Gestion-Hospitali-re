@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../domain/patient.dart';
 import 'patient_providers.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class PatientFormScreen extends ConsumerStatefulWidget {
   final String? id;
@@ -33,7 +34,7 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id == null ? 'Nouveau Patient' : 'Modifier Patient'),
+        title: Text(widget.id == null ? ref.tr('new_patient') : ref.tr('edit_patient')),
       ),
       body: Form(
         key: _formKey,
@@ -42,16 +43,16 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
           children: [
             TextFormField(
               controller: _nomController,
-              decoration: const InputDecoration(labelText: 'Nom'),
+              decoration: InputDecoration(labelText: ref.tr('name')),
               validator: (value) =>
-                  value == null || value.isEmpty ? 'Champ requis' : null,
+                  value == null || value.isEmpty ? ref.tr('required_field') : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _prenomController,
-              decoration: const InputDecoration(labelText: 'Prénom'),
+              decoration: InputDecoration(labelText: ref.tr('first_name')),
               validator: (value) =>
-                  value == null || value.isEmpty ? 'Champ requis' : null,
+                  value == null || value.isEmpty ? ref.tr('required_field') : null,
             ),
             const SizedBox(height: 16),
             InkWell(
@@ -67,10 +68,10 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
                 }
               },
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Date de Naissance'),
+                decoration: InputDecoration(labelText: ref.tr('birth_date')),
                 child: Text(
                   _dateNaissance == null
-                      ? 'Sélectionner une date'
+                      ? ref.tr('select_date')
                       : DateFormat('dd/MM/yyyy').format(_dateNaissance!),
                 ),
               ),
@@ -78,14 +79,14 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _secuController,
-              decoration: const InputDecoration(labelText: 'Numéro Sécurité Sociale'),
+              decoration: InputDecoration(labelText: ref.tr('social_security')),
               validator: (value) =>
-                  value == null || value.isEmpty ? 'Champ requis' : null,
+                  value == null || value.isEmpty ? ref.tr('required_field') : null,
             ),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _submit,
-              child: const Text('Enregistrer'),
+              child: Text(ref.tr('save')),
             ),
           ],
         ),
@@ -112,12 +113,12 @@ class _PatientFormScreenState extends ConsumerState<PatientFormScreen> {
         if (mounted) context.pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text('${ref.tr('error')}: $e')),
         );
       }
     } else if (_dateNaissance == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une date de naissance')),
+        SnackBar(content: Text(ref.tr('select_date'))),
       );
     }
   }

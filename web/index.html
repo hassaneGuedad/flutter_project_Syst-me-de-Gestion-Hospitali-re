@@ -18,7 +18,22 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Système de Gestion Hospitalière - Tableau de bord d'anticipation financière">
+  
+  <!-- Content Security Policy pour Flutter Web avec unsafe-eval pour les extensions -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' *;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: * https://www.gstatic.com https://fonts.gstatic.com;
+    script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' blob: * https://www.gstatic.com https://fonts.gstatic.com;
+    style-src 'self' 'unsafe-inline' * https://fonts.googleapis.com;
+    font-src 'self' * data: blob: https://fonts.gstatic.com;
+    img-src 'self' data: blob: * https:;
+    connect-src 'self' * http://localhost:* ws://localhost:* wss://localhost:* https://www.gstatic.com https://fonts.gstatic.com;
+    worker-src 'self' blob: * https://www.gstatic.com;
+    child-src 'self' blob: *;
+    frame-src 'self' blob: *;
+    wasm-unsafe-eval;
+  ">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -29,8 +44,88 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>clean_arch_app</title>
+  <title>Système de Gestion Hospitalière</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Gestionnaire d'erreurs pour ignorer les erreurs d'extensions de navigateur -->
+  <script>
+    // Liste des extensions à ignorer
+    const ignoredExtensions = [
+      'MetaMask',
+      'Solana',
+      'solana',
+      'ethereum',
+      'web3',
+      'solanaActionsContentScript',
+      'phantom',
+      'coinbase',
+      'wallet',
+      'Wx',
+      'b4',
+      'Something went wrong'
+    ];
+
+    // Fonction pour vérifier si l'erreur provient d'une extension
+    function isExtensionError(message) {
+      if (!message) return false;
+      const msg = message.toString().toLowerCase();
+      return ignoredExtensions.some(ext => msg.includes(ext.toLowerCase()));
+    }
+
+    // Ignorer les erreurs des extensions de navigateur
+    window.addEventListener('error', function(event) {
+      if (isExtensionError(event.message) || 
+          isExtensionError(event.filename) ||
+          (event.error && isExtensionError(event.error.toString()))) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    }, true); // Capture phase pour intercepter tôt
+
+    // Ignorer les promesses rejetées liées aux extensions
+    window.addEventListener('unhandledrejection', function(event) {
+      const reason = event.reason ? event.reason.toString() : '';
+      const message = event.reason?.message ? event.reason.message.toString() : '';
+      if (isExtensionError(reason) || isExtensionError(message) ||
+          (event.reason && event.reason.message && isExtensionError(event.reason.message))) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    });
+
+    // Supprimer les erreurs CSP et d'extensions de la console
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+      const message = args.join(' ');
+      // Ignorer les erreurs CSP et les erreurs d'extensions
+      if (message.includes('Content Security Policy') ||
+          message.includes('CSP') ||
+          message.includes('blocks the use of') ||
+          message.includes('unsafe-eval') ||
+          isExtensionError(message)) {
+        return; // Ignorer silencieusement
+      }
+      originalConsoleError.apply(console, args);
+    };
+
+    // Supprimer les warnings de dépréciation non critiques et CSP
+    const originalConsoleWarn = console.warn;
+    console.warn = function(...args) {
+      const message = args.join(' ');
+      // Ignorer les warnings de dépréciation Intl.v8BreakIterator (c'est un warning Flutter interne)
+      // Ignorer les warnings CSP liés aux extensions
+      if (message.includes('Intl.v8BreakIterator') || 
+          message.includes('deprecated') ||
+          message.includes('Content Security Policy') ||
+          message.includes('CSP') ||
+          isExtensionError(message)) {
+        return; // Ignorer silencieusement
+      }
+      originalConsoleWarn.apply(console, args);
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

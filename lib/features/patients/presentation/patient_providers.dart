@@ -1,56 +1,74 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/patient_repository_impl.dart';
 import '../domain/patient.dart';
 import '../domain/patient_repository.dart';
 
-import '../../../core/network/dio_provider.dart';
+// Repository singleton
+final _repositoryInstance = PatientRepositoryImpl();
 
-part 'patient_providers.g.dart';
+// Provider pour le repository (singleton)
+final patientRepositoryProvider = Provider<PatientRepository>((ref) {
+  return _repositoryInstance;
+});
 
-@riverpod
-PatientRepository patientRepository(PatientRepositoryRef ref) {
-  final dio = ref.watch(dioProvider);
-  return PatientRepositoryImpl(dio);
-}
-
-@riverpod
-Future<List<Patient>> patientsList(PatientsListRef ref) async {
+// Provider pour la liste des patients avec keepAlive
+final patientsListProvider = FutureProvider<List<Patient>>((ref) async {
+  ref.keepAlive();
   return ref.watch(patientRepositoryProvider).getPatients();
-}
+});
 
-@riverpod
-Future<Patient> patientDetail(PatientDetailRef ref, String id) async {
+// Provider pour un patient par ID
+final patientDetailProvider = FutureProvider.family<Patient, String>((
+  ref,
+  id,
+) async {
   return ref.watch(patientRepositoryProvider).getPatient(id);
-}
+});
 
-@riverpod
-class PatientController extends _$PatientController {
-  @override
-  FutureOr<void> build() {
-    // nothing to do
-  }
+// Controller pour les opérations CRUD
+class PatientController extends StateNotifier<AsyncValue<void>> {
+  final Ref _ref;
+
+  PatientController(this._ref) : super(const AsyncValue.data(null));
 
   Future<void> createPatient(Patient patient) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => 
-      ref.read(patientRepositoryProvider).createPatient(patient)
-    );
-    ref.invalidate(patientsListProvider);
+    state = const AsyncValue.loading();
+    try {
+      await _ref.read(patientRepositoryProvider).createPatient(patient);
+      _ref.invalidate(patientsListProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 
   Future<void> updatePatient(Patient patient) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => 
-      ref.read(patientRepositoryProvider).updatePatient(patient)
-    );
-    ref.invalidate(patientsListProvider);
+    state = const AsyncValue.loading();
+    try {
+      await _ref.read(patientRepositoryProvider).updatePatient(patient);
+      _ref.invalidate(patientsListProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 
   Future<void> deletePatient(String id) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => 
-      ref.read(patientRepositoryProvider).deletePatient(id)
-    );
-    ref.invalidate(patientsListProvider);
+    state = const AsyncValue.loading();
+    try {
+      await _ref.read(patientRepositoryProvider).deletePatient(id);
+      _ref.invalidate(patientsListProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 }
+
+final patientControllerProvider =
+    StateNotifierProvider<PatientController, AsyncValue<void>>((ref) {
+      return PatientController(ref);
+    });

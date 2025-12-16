@@ -1,0 +1,36 @@
+package com.hospital.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "rendez_vous")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RendezVous {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+    
+    @Column(nullable = false)
+    private LocalDateTime dateHeure;
+    
+    @Column(nullable = false)
+    private String motif;
+    
+    @Column(nullable = false)
+    private String statut = "En attente";
+    
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+}

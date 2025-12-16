@@ -34,4 +34,9 @@ public class ServiceService {
         service.setCoutActuel(serviceDetails.getCoutActuel());
         return serviceRepository.save(service);
     }
+
+    public void deleteService(Long id) {
+        Service service = getServiceById(id);
+        serviceRepository.delete(service);
+    }
 }

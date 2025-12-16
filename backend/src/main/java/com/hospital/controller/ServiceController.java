@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/services")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ServiceController {
 
     private final ServiceService serviceService;
@@ -36,5 +37,11 @@ public class ServiceController {
             @PathVariable Long id,
             @RequestBody Service service) {
         return ResponseEntity.ok(serviceService.updateService(id, service));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteService(@PathVariable Long id) {
+        serviceService.deleteService(id);
+        return ResponseEntity.noContent().build();
     }
 }

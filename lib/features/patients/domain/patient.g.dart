@@ -8,7 +8,7 @@ part of 'patient.dart';
 
 _$PatientImpl _$$PatientImplFromJson(Map<String, dynamic> json) =>
     _$PatientImpl(
-      id: json['id'] as String,
+      id: const _IntToStringConverter().fromJson(json['id']),
       nom: json['nom'] as String,
       prenom: json['prenom'] as String,
       dateNaissance: DateTime.parse(json['dateNaissance'] as String),
@@ -23,7 +23,7 @@ _$PatientImpl _$$PatientImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$PatientImplToJson(_$PatientImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'id': const _IntToStringConverter().toJson(instance.id),
       'nom': instance.nom,
       'prenom': instance.prenom,
       'dateNaissance': instance.dateNaissance.toIso8601String(),

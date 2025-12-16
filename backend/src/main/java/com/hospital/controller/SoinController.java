@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/soins")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class SoinController {
 
     private final SoinService soinService;
@@ -40,5 +41,16 @@ public class SoinController {
     @GetMapping("/service/{serviceId}")
     public ResponseEntity<List<Soin>> getSoinsByService(@PathVariable Long serviceId) {
         return ResponseEntity.ok(soinService.getSoinsByServiceId(serviceId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Soin> updateSoin(@PathVariable Long id, @RequestBody Soin soin) {
+        return ResponseEntity.ok(soinService.updateSoin(id, soin));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSoin(@PathVariable Long id) {
+        soinService.deleteSoin(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'patient_providers.dart';
 import '../../soins/presentation/soin_providers.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class PatientDetailScreen extends ConsumerWidget {
   final String id;
@@ -16,7 +17,7 @@ class PatientDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Détails Patient'),
+        title: Text(ref.tr('patient_details')),
       ),
       body: patientAsync.when(
         data: (patient) => SingleChildScrollView(
@@ -35,29 +36,29 @@ class PatientDetailScreen extends ConsumerWidget {
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 16),
-                      _buildInfoRow('Date de naissance', DateFormat('dd/MM/yyyy').format(patient.dateNaissance)),
-                      _buildInfoRow('Sécurité Sociale', patient.numeroSecuriteSociale),
+                      _buildInfoRow(ref.tr('birth_date'), DateFormat('dd/MM/yyyy').format(patient.dateNaissance)),
+                      _buildInfoRow(ref.tr('social_security'), patient.numeroSecuriteSociale),
                       _buildInfoRow(
-                        'Coût total',
+                        ref.tr('total_cost'),
                         NumberFormat.currency(locale: 'fr_FR', symbol: '€').format(patient.coutTotal),
                       ),
-                      _buildInfoRow('Nombre de soins', '${patient.soinIds.length}'),
+                      _buildInfoRow(ref.tr('care_count'), '${patient.soinIds.length}'),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'Historique des Soins',
+                ref.tr('care_list'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               soinsAsync.when(
                 data: (soins) => soins.isEmpty
-                    ? const Card(
+                    ? Card(
                         child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text('Aucun soin enregistré'),
+                          padding: const EdgeInsets.all(16),
+                          child: Text(ref.tr('no_care_found')),
                         ),
                       )
                     : Column(
@@ -79,13 +80,13 @@ class PatientDetailScreen extends ConsumerWidget {
                         )).toList(),
                       ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Text('Erreur: $err'),
+                error: (err, stack) => Text('${ref.tr('error')}: $err'),
               ),
             ],
           ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Erreur: $err')),
+        error: (err, stack) => Center(child: Text('${ref.tr('error')}: $err')),
       ),
     );
   }

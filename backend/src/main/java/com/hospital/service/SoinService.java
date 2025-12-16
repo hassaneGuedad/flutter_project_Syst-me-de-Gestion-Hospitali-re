@@ -35,4 +35,26 @@ public class SoinService {
     public List<Soin> getSoinsByServiceId(Long serviceId) {
         return soinRepository.findByServiceId(serviceId);
     }
+
+    public Soin updateSoin(Long id, Soin soinDetails) {
+        Soin soin = soinRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Soin not found with id: " + id));
+        soin.setTypeSoin(soinDetails.getTypeSoin());
+        soin.setCout(soinDetails.getCout());
+        soin.setDateSoin(soinDetails.getDateSoin());
+        soin.setDescription(soinDetails.getDescription());
+        if (soinDetails.getPatient() != null) {
+            soin.setPatient(soinDetails.getPatient());
+        }
+        if (soinDetails.getService() != null) {
+            soin.setService(soinDetails.getService());
+        }
+        return soinRepository.save(soin);
+    }
+
+    public void deleteSoin(Long id) {
+        Soin soin = soinRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Soin not found with id: " + id));
+        soinRepository.delete(soin);
+    }
 }

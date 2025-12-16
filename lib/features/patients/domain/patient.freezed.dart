@@ -21,6 +21,7 @@ Patient _$PatientFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Patient {
+  @_IntToStringConverter()
   String get id => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
   String get prenom => throw _privateConstructorUsedError;
@@ -44,7 +45,7 @@ abstract class $PatientCopyWith<$Res> {
       _$PatientCopyWithImpl<$Res, Patient>;
   @useResult
   $Res call({
-    String id,
+    @_IntToStringConverter() String id,
     String nom,
     String prenom,
     DateTime dateNaissance,
@@ -122,7 +123,7 @@ abstract class _$$PatientImplCopyWith<$Res> implements $PatientCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    String id,
+    @_IntToStringConverter() String id,
     String nom,
     String prenom,
     DateTime dateNaissance,
@@ -193,7 +194,7 @@ class __$$PatientImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$PatientImpl implements _Patient {
   const _$PatientImpl({
-    required this.id,
+    @_IntToStringConverter() required this.id,
     required this.nom,
     required this.prenom,
     required this.dateNaissance,
@@ -206,6 +207,7 @@ class _$PatientImpl implements _Patient {
       _$$PatientImplFromJson(json);
 
   @override
+  @_IntToStringConverter()
   final String id;
   @override
   final String nom;
@@ -278,7 +280,7 @@ class _$PatientImpl implements _Patient {
 
 abstract class _Patient implements Patient {
   const factory _Patient({
-    required final String id,
+    @_IntToStringConverter() required final String id,
     required final String nom,
     required final String prenom,
     required final DateTime dateNaissance,
@@ -290,6 +292,7 @@ abstract class _Patient implements Patient {
   factory _Patient.fromJson(Map<String, dynamic> json) = _$PatientImpl.fromJson;
 
   @override
+  @_IntToStringConverter()
   String get id;
   @override
   String get nom;

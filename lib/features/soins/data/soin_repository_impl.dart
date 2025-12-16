@@ -1,98 +1,187 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../../core/network/api_config.dart';
 import '../domain/soin.dart';
 import '../domain/soin_repository.dart';
 
+/// Implémentation du repository des soins
+/// Connecté au backend Spring Boot via API REST
 class SoinRepositoryImpl implements SoinRepository {
-  final List<Soin> _soins = [
-    Soin(
-      id: '1',
-      patientId: '1',
-      serviceId: '1',
-      typeSoin: 'Consultation cardiologie',
-      cout: 150.00,
-      dateSoin: DateTime(2025, 1, 15, 10, 30),
-      description: 'Consultation de routine',
-    ),
-    Soin(
-      id: '2',
-      patientId: '1',
-      serviceId: '1',
-      typeSoin: 'ECG',
-      cout: 80.00,
-      dateSoin: DateTime(2025, 1, 15, 11, 0),
-      description: 'Électrocardiogramme',
-    ),
-    Soin(
-      id: '3',
-      patientId: '1',
-      serviceId: '1',
-      typeSoin: 'Échographie cardiaque',
-      cout: 1020.50,
-      dateSoin: DateTime(2025, 1, 20, 14, 0),
-      description: 'Échographie doppler',
-    ),
-    Soin(
-      id: '4',
-      patientId: '2',
-      serviceId: '2',
-      typeSoin: 'Urgence',
-      cout: 300.00,
-      dateSoin: DateTime(2025, 1, 18, 22, 15),
-      description: 'Prise en charge urgence',
-    ),
-    Soin(
-      id: '5',
-      patientId: '2',
-      serviceId: '3',
-      typeSoin: 'Radiographie',
-      cout: 2040.75,
-      dateSoin: DateTime(2025, 1, 19, 9, 0),
-      description: 'Radio thorax',
-    ),
-    Soin(
-      id: '6',
-      patientId: '3',
-      serviceId: '4',
-      typeSoin: 'Consultation pédiatrie',
-      cout: 890.00,
-      dateSoin: DateTime(2025, 1, 22, 15, 30),
-      description: 'Suivi vaccinal',
-    ),
-  ];
+  final String _baseUrl = '${ApiConfig.baseUrl}/api/soins';
 
-  @override
-  Future<Soin> createSoin(Soin soin) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _soins.add(soin);
-    return soin;
+  Map<String, String> get _headers => {'Content-Type': 'application/json'};
+
+  /// Convertit la réponse JSON du backend en objet Soin
+  Soin _soinFromJson(Map<String, dynamic> json) {
+    return Soin(
+      id: json['id'].toString(),
+      patientId:
+          json['patient']?['id']?.toString() ??
+          json['patientId']?.toString() ??
+          '',
+      serviceId:
+          json['service']?['id']?.toString() ??
+          json['serviceId']?.toString() ??
+          '',
+      typeSoin: json['typeSoin'] ?? '',
+      cout: (json['cout'] ?? 0).toDouble(),
+      dateSoin: json['dateSoin'] != null
+          ? DateTime.parse(json['dateSoin'])
+          : DateTime.now(),
+      description: json['description'],
+    );
   }
 
-  @override
-  Future<void> deleteSoin(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _soins.removeWhere((s) => s.id == id);
-  }
-
-  @override
-  Future<Soin> getSoin(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _soins.firstWhere((s) => s.id == id);
+  /// Convertit un Soin en JSON pour le backend
+  Map<String, dynamic> _soinToJson(Soin soin) {
+    return {
+      if (soin.id.isNotEmpty && soin.id != '0') 'id': int.tryParse(soin.id),
+      'patient': {'id': int.tryParse(soin.patientId)},
+      'service': {'id': int.tryParse(soin.serviceId)},
+      'typeSoin': soin.typeSoin,
+      'cout': soin.cout,
+      'dateSoin': soin.dateSoin.toIso8601String(),
+      'description': soin.description,
+    };
   }
 
   @override
   Future<List<Soin>> getSoins() async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    return _soins;
+    try {
+      print('📡 GET $_baseUrl');
+      final response = await http.get(Uri.parse(_baseUrl), headers: _headers);
+      print('📥 Response: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => _soinFromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Erreur lors de la récupération des soins: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
+  }
+
+  @override
+  Future<Soin> getSoin(String id) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/$id'),
+        headers: _headers,
+      );
+
+      if (response.statusCode == 200) {
+        return _soinFromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Soin non trouvé: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
+  }
+
+  @override
+  Future<Soin> createSoin(Soin soin) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_baseUrl),
+        headers: _headers,
+        body: jsonEncode(_soinToJson(soin)),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return _soinFromJson(jsonDecode(response.body));
+      } else {
+        throw Exception(
+          'Erreur lors de la création du soin: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
+  }
+
+  @override
+  Future<Soin> updateSoin(Soin soin) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/${soin.id}'),
+        headers: _headers,
+        body: jsonEncode(_soinToJson(soin)),
+      );
+
+      if (response.statusCode == 200) {
+        return _soinFromJson(jsonDecode(response.body));
+      } else {
+        throw Exception(
+          'Erreur lors de la mise à jour du soin: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteSoin(String id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/$id'),
+        headers: _headers,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception(
+          'Erreur lors de la suppression du soin: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
   }
 
   @override
   Future<List<Soin>> getSoinsByPatient(String patientId) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _soins.where((s) => s.patientId == patientId).toList();
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/patient/$patientId'),
+        headers: _headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => _soinFromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Erreur lors de la récupération des soins: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
   }
 
   @override
   Future<List<Soin>> getSoinsByService(String serviceId) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _soins.where((s) => s.serviceId == serviceId).toList();
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/service/$serviceId'),
+        headers: _headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => _soinFromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Erreur lors de la récupération des soins: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion au serveur: $e');
+    }
   }
 }

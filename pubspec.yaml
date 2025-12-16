@@ -26,6 +26,10 @@ dependencies:
   intl: ^0.20.2
   # Icons
   font_awesome_flutter: ^10.12.0
+  # Web download
+  universal_html: ^2.2.4
+  # Persistence
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
