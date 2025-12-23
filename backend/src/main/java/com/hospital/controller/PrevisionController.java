@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/prevision")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+
 public class PrevisionController {
 
     private final PrevisionService previsionService;

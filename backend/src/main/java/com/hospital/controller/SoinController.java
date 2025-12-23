@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/soins")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+
 public class SoinController {
 
     private final SoinService soinService;

@@ -55,36 +55,14 @@ public class SecurityConfig {
             // Configure CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
-            // Configure les autorisations
+            // Configure les autorisations - TOUT PERMETTRE pour le développement
             .authorizeHttpRequests(auth -> auth
-                // Endpoints publics (login, swagger, etc.)
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/logout").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                
-                // API endpoints publics (pour le développement)
-                .requestMatchers("/api/services/**").permitAll()
-                .requestMatchers("/api/soins/**").permitAll()
-                .requestMatchers("/api/patients/**").permitAll()
-                .requestMatchers("/api/rendez-vous/**").permitAll()
-                .requestMatchers("/api/factures/**").permitAll()
-                .requestMatchers("/api/paiements/**").permitAll()
-                
-                // Tous les autres endpoints nécessitent une authentification
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             
             // Mode stateless (pas de session côté serveur)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            
-            // Ajoute le filtre JWT avant le filtre d'authentification standard
-            .addFilterBefore(
-                new JwtAuthenticationFilter(jwtService, utilisateurRepository),
-                UsernamePasswordAuthenticationFilter.class
             )
             
             // Permet l'accès à la console H2 (pour le développement)

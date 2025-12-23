@@ -15,7 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/alertes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+
 public class AlerteController {
 
     private final AlerteService alerteService;

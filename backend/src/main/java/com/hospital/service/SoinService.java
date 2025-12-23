@@ -43,11 +43,11 @@ public class SoinService {
         soin.setCout(soinDetails.getCout());
         soin.setDateSoin(soinDetails.getDateSoin());
         soin.setDescription(soinDetails.getDescription());
-        if (soinDetails.getPatient() != null) {
-            soin.setPatient(soinDetails.getPatient());
+        if (soinDetails.getPatientId() != null) {
+            soin.setPatientId(soinDetails.getPatientId());
         }
-        if (soinDetails.getService() != null) {
-            soin.setService(soinDetails.getService());
+        if (soinDetails.getServiceId() != null) {
+            soin.setServiceId(soinDetails.getServiceId());
         }
         return soinRepository.save(soin);
     }
