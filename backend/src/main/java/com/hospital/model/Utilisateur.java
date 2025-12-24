@@ -25,8 +25,8 @@ public class Utilisateur {
     @Column(nullable = false, unique = true)
     private String email;
     
-    @Column(name = "mot_de_passe", nullable = false)
-    private String motDePasse; // Stocké haché avec BCrypt
+    @Column(name = "mot_de_passe", nullable = true)
+    private String motDePasse; // Stocké haché avec BCrypt - nullable pour le premier login
     
     @Column(length = 100)
     private String nom;

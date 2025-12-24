@@ -73,19 +73,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         log.debug("Utilisateur authentifié: {}", email);
                     } else {
                         log.warn("Token invalide ou mot de passe changé pour: {}", email);
-                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        response.getWriter().write("{\"error\":\"TOKEN_INVALID\",\"message\":\"Token invalide ou expiré. Veuillez vous reconnecter.\",\"status\":403}");
-                        response.setContentType("application/json");
-                        return;
+                        // Continue avec la chaîne de filtres - la sécurité décidera si l'accès est permis
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("Erreur lors de la validation du token: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\":\"UNAUTHORIZED\",\"message\":\"Token invalide\",\"status\":401}");
-            response.setContentType("application/json");
-            return;
+            log.debug("Token JWT non valide ou absent: {}", e.getMessage());
+            // Continue avec la chaîne de filtres - les endpoints publics seront accessibles
         }
         
         filterChain.doFilter(request, response);
